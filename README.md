@@ -5,7 +5,7 @@
 
 Material design: Text fields with location autocomplete
 
-`<places-autocomplete-input>` is a single-line text field with Material Design styling and location autocomplete based on the Google Maps API.
+`<places-autocomplete-input>` is a single-line text field with Material Design styling and location autocomplete based on the Google Maps API. READY TO USE WITH POLYMER 2
 
 Example:
 
