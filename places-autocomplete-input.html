@@ -27,7 +27,7 @@ This element work with the Google Maps API. You need a valid API Key. You can ge
       </style>
   
       <paper-input
-      id="inputPaper"
+      id="placesAutoCompleteInputId"
       on-value-changed="_resetLocation"
       invalid="{{invalid}}"
       disabled$="[[disabled]]"
@@ -172,7 +172,7 @@ This element work with the Google Maps API. You need a valid API Key. You can ge
             if (this.place.geometry) {
                 return true;
             } else {
-                this.$.inputPaper.invalid = true;
+                this.$.placesAutoCompleteInputId.invalid = true;
                 return false;
             }
         }
@@ -192,19 +192,14 @@ This element work with the Google Maps API. You need a valid API Key. You can ge
         }
 
         _onApiLoad() {
-            var rawInput;
-            if (this.$.inputPaper.querySelector('#input')) {
-                rawInput = this.$.inputPaper.inputElement.querySelector('#nativeInput');
-            } else {
-                rawInput = this.$.inputPaper.root.querySelector('#nativeInput');
-            }
+            var rawInput = this.$.placesAutoCompleteInputId.$.nativeInput;
             this.autocomplete = new google.maps.places.Autocomplete(rawInput, this.options);
             google.maps.event.addListener(this.autocomplete, 'place_changed', this._onChangePlace.bind(this));
         }
 
 
         _onChangePlace() {
-            this.$.inputPaper.invalid = false;
+            this.$.placesAutoCompleteInputId.invalid = false;
             this.place = this.autocomplete.getPlace();
             this.locationName = this.autocomplete.getPlace().formatted_address;
             this.latitude = this.autocomplete.getPlace().geometry.location.lat();
