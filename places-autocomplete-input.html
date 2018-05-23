@@ -1,11 +1,8 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../google-apis/google-maps-api.html">
-
-<!--
-### places-autocomplete-input
+<!-- # places-autocomplete-input
 Material design: [Text fields](https://www.google.com/design/spec/components/text-fields.html) with location autocomplete
-
 `<places-autocomplete-input>` is a single-line text field with Material Design styling and location autocomplete.
 
     <places-autocomplete-input label="Place"></places-autocomplete-input>
@@ -14,202 +11,162 @@ Material design: [Text fields](https://www.google.com/design/spec/components/tex
 
 This element work with the Google Maps API. You need a valid API Key. You can get one here: https://developers.google.com/maps/documentation/javascript/get-api-key.
 
+@element places-autocomplete-input
+@customElement
+@polymer
 @demo demo/index.html
 -->
-
-
 <dom-module id="places-autocomplete-input">
     <template>
-      <style>
-        :host {
-          display: block;
-        }
-      </style>
-  
-      <paper-input
-      id="placesAutoCompleteInputId"
-      on-value-changed="_resetLocation"
-      invalid="{{invalid}}"
-      disabled$="[[disabled]]"
-      autofocus="[[autofocus]]"
-      label="[[label]]"
-      value="{{query}}"
-      required$="[[required]]"
-      error-message="[[errorMessage]]">
-  </paper-input>
-      <google-maps-api id="maps" api-key="[[mapsApiKey]]" libraries="places" on-api-load="_onApiLoad"></google-maps-api>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+        <paper-input
+                id="placesAutoCompleteInputId"
+                invalid="{{invalid}}"
+                disabled$="[[disabled]]"
+                autofocus="[[autofocus]]"
+                placeholder="[[placeholder]]"
+                label="[[label]]"
+                value="{{query}}"
+                required$="[[required]]"
+                error-message="[[errorMessage]]">
+        </paper-input>
+        <google-maps-api id="maps" api-key="[[mapsApiKey]]" libraries="places" on-api-load="_onApiLoad"></google-maps-api>
     </template>
+    <script>
+        class PlacesAutocompleteInput extends Polymer.Element {
+            static get is() { return 'places-autocomplete-input'; }
+            static get properties() {
+                return {
+                    prop1: {
+                        type: String,
+                        value: 'places-autocomplete-input'
+                    },
+                    /** Actual value of the paper-input */
+                    query: {
+                        type: String,
+                        notify: true,
+                        observer: '_resetLocation'
+                    },
+                    /** Option for the Autocomplete Google Maps API */
+                    autocompleteOptions: {
+                        type: Object,
+                        value: function() {
+                            return {};
+                        }
+                    },
+                    /** Place object is set after the user click on one Google Maps autocomplete result. */
+                    place: {
+                        type: Object,
+                        value: function() {
+                            return {};
+                        },
+                        notify: true
+                    },
+                    /** Computed object with latitude and longitude */
+                    locationGeoPos: {
+                        type: Object,
+                        computed: '_computeLocation(longitude, latitude)'
+                    },
+                    /** Location formatted address of the last clicked place. */
+                    locationName: {
+                        type: String,
+                        notify: true
+                    },
+                    /** Latitude of the last clicked place. */
+                    latitude: {
+                        type: Number,
+                        notify: true
+                    },
+                    /** Longitude of the last clicked place. */
+                    longitude: {
+                        type: Number,
+                        notify: true
+                    },
+                    /** Set to true to disable this input. */
+                    disabled: {
+                        type: Boolean,
+                        default: false
+                    },
+                    /** Set to true to mark the input as required. */
+                    required: {
+                        type: Boolean,
+                        default: false
+                    },
+                    /** Returns true if the value is invalid */
+                    invalid: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    },
+                    /** Google Maps api key. To obtain an API key, see https://developers.google.com/maps/documentation/javascript/get-api-key. */
+                    mapsApiKey: String,
+                    /** The label for this input. */
+                    label: String,
+                    /** Autofocus propertie */
+                    autofocus: Boolean,
+                    /** The error message to display when the input is invalid. */
+                    errorMessage: String,
+                    /** Text to display on floating label */
+                    placeholder: String
+                };
+            }
 
-
-  <script>
-    /**
-     * `places-autocomplete-input`
-     * Places autocomplete webcomponent
-     *
-     * @customElement
-     * @polymer
-     * @demo demo/index.html
-     */
-    class PlacesAutocompleteInput extends Polymer.Element {
-      static get is() { return 'places-autocomplete-input'; }
-      static get properties() {
-        return {
-          prop1: {
-            type: String,
-            value: 'places-autocomplete-input'
-          },
-          
-            /**
-             * Actual value of the paper-input
-             */
-             query: {
-                type: String,
-                notify: true
-            },
-            /**
-             * Option for the Autocomplete Google Maps API
-             */
-            autocompleteOptions: {
-                type: Object,
-                value: function() {
-                    return {};
+            /** Validate if the input is filled with a valid Google Map address.
+             * @return {Boolean} */
+            validatePlace() {
+                if (this.place.geometry) {
+                    return true;
+                } else {
+                    this.$.placesAutoCompleteInputId.invalid = true;
+                    return false;
                 }
-            },
-            /**
-             * Place object is set after the user click on one Google Maps autocomplete result.
-             */
-            place: {
-                type: Object,
-                value: function() {
-                    return {};
-                },
-                notify: true
-            },
-            /**
-             * Computed object with latitude and longitude
-             */
-            locationGeoPos: {
-                type: Object,
-                computed: '_computeLocation(longitude, latitude)'
-            },
-            /**
-             * Location formatted address of the last clicked place.
-             */
-            locationName: {
-                type: String,
-                notify: true
-            },
-            /**
-             * Latitude of the last clicked place.
-             */
-            latitude: {
-                type: Number,
-                notify: true
-            },
-            /**
-             * Longitude of the last clicked place.
-             */
-            longitude: {
-                type: Number,
-                notify: true
-            },
-            /**
-             * Set to true to disable this input.
-             */
-            disabled: {
-                type: Boolean,
-                default: false
-            },
-            /**
-             * Set to true to mark the input as required.
-             */
-            required: {
-                type: Boolean,
-                default: false
-            },
-            /**
-             * Returns true if the value is invalid
-             */
-            invalid: {
-                type: Boolean,
-                value: false,
-                notify: true
-            },
-            /**
-             * Google Maps api key. To obtain an API key, see https://developers.google.com/maps/documentation/javascript/get-api-key.
-             */
-            mapsApiKey: String,
-            /**
-             * The label for this input.
-             */
-            label: String,
-            /**
-             * Autofocus propertie
-             */
-            autofocus: Boolean,
-            /**
-             * The error message to display when the input is invalid.
-             */
-            errorMessage: String
+            }
 
+            /** Used to make a LatLng object from two coordinates
+             * @private
+             * @param {Number} longitude
+             * @param {Number} latitude
+             * @return {Object} */
+            _computeLocation(longitude, latitude) {
+                return {
+                    'lng': longitude,
+                    'lat': latitude
+                }
+            }
 
-        };
-      }
+            /** reset place property
+             * @private
+             * @return {void} */
+            _resetLocation() {
+                this.place = {};
+            }
 
+            /** Callback of api-load event (google-maps-api), used to get the selected place id
+             * @private
+             * @return {void} */
+            _onApiLoad() {
+                var rawInput = this.$.placesAutoCompleteInputId.$.nativeInput;
+                this.autocomplete = new google.maps.places.Autocomplete(rawInput, this.options);
+                google.maps.event.addListener(this.autocomplete, 'place_changed', this._onChangePlace.bind(this));
+            }
 
-      
-      static get observers() { return [
-        '_resetLocation()'
-      ]}
-
-
-
-
-        /**
-         * Validate if the input is filled with a valid Google Map address.
-         */
-      validatePlace() {
-            if (this.place.geometry) {
-                return true;
-            } else {
-                this.$.placesAutoCompleteInputId.invalid = true;
-                return false;
+            /** used to set the place property
+             * @private
+             * @return {void} */
+            _onChangePlace() {
+                this.$.placesAutoCompleteInputId.invalid = false;
+                this.place = this.autocomplete.getPlace();
+                this.locationName = this.autocomplete.getPlace().formatted_address;
+                this.latitude = this.autocomplete.getPlace().geometry.location.lat();
+                this.longitude = this.autocomplete.getPlace().geometry.location.lng();
+                this.dispatchEvent(new CustomEvent('place-clicked', {detail: {place: this.place}}));
             }
         }
 
-
-        
-        _computeLocation(longitude, latitude) {
-            return {
-                'lng': longitude,
-                'lat': latitude
-            }
-        }
-
-        
-        _resetLocation() {
-            this.place = {};
-        }
-
-        _onApiLoad() {
-            var rawInput = this.$.placesAutoCompleteInputId.$.nativeInput;
-            this.autocomplete = new google.maps.places.Autocomplete(rawInput, this.options);
-            google.maps.event.addListener(this.autocomplete, 'place_changed', this._onChangePlace.bind(this));
-        }
-
-
-        _onChangePlace() {
-            this.$.placesAutoCompleteInputId.invalid = false;
-            this.place = this.autocomplete.getPlace();
-            this.locationName = this.autocomplete.getPlace().formatted_address;
-            this.latitude = this.autocomplete.getPlace().geometry.location.lat();
-            this.longitude = this.autocomplete.getPlace().geometry.location.lng();
-            this.dispatchEvent(new CustomEvent('place-clicked', {place: this.place}));
-            console.log(this.place);
-        }
-
-    }
-
-    window.customElements.define(PlacesAutocompleteInput.is, PlacesAutocompleteInput);
-  </script>
+        window.customElements.define(PlacesAutocompleteInput.is, PlacesAutocompleteInput);
+    </script>
 </dom-module>
