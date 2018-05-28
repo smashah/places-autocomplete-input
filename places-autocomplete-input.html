@@ -34,7 +34,7 @@ This element work with the Google Maps API. You need a valid API Key. You can ge
                 required$="[[required]]"
                 error-message="[[errorMessage]]">
         </paper-input>
-        <google-maps-api id="maps" api-key="[[mapsApiKey]]" libraries="places" on-api-load="_onApiLoad"></google-maps-api>
+        <google-maps-api id="maps" api-key="[[mapsApiKey]]" libraries="places" language="[[language]]" on-api-load="_onApiLoad"></google-maps-api>
     </template>
     <script>
         class PlacesAutocompleteInput extends Polymer.Element {
@@ -110,8 +110,13 @@ This element work with the Google Maps API. You need a valid API Key. You can ge
                     autofocus: Boolean,
                     /** The error message to display when the input is invalid. */
                     errorMessage: String,
-                    /** Text to display on floating label */
-                    placeholder: String
+                    /** Text to display on input placeholder */
+                    placeholder: String,
+                    /** The localized language to load the Maps API with */
+                    language: {
+                        type: String,
+                        value: ''
+                    }
                 };
             }
 
